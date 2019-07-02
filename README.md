@@ -39,3 +39,6 @@ yarn --registry=https://registry.npm.taobao.org --disturl=https://npm.taobao.org
 
 https://www.cnblogs.com/zhaobao1830/p/9431454.html
 
+
+规定：文件夹和文件命名不要出现大写字母
+

@@ -36,44 +36,42 @@ img {
   user-select: none;
 }
 
-// 元素容器宽高比例子 postcss-aspect-ratio-mini 依赖库
-[aspectratio] {
-  position: relative;
-}
-[aspectratio]::before {
-  content: '';
-  display: block;
-  width: 1px;
-  margin-left: -1px;
-  height: 0;
-}
-
-[aspectratio-content] {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
+html,body,.app,#app{
+  margin: 0;
+  padding: 0;
   height: 100%;
+  overflow: hidden;
 }
 
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+.layoutPage .el-submenu .el-menu-item,.layoutPage .el-menu-item,.layoutPage .el-submenu__title,.layoutPage .el-submenu .el-submenu__title{
+  white-space: normal;
+  height: auto;
+  line-height: normal;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
+.layoutPage .el-menu--collapse {
+  .el-submenu .el-menu-item,.el-menu-item,.el-submenu__title,.el-submenu .el-submenu__title{
+    height: 56px;
+    line-height: 56px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding: 0px 20px;
+    white-space: nowrap;
+    .submenuTitle{
+      padding-left: 64px;
+      display: none;
     }
   }
+  .el-submenu__icon-arrow {
+    right: 10px;
+    margin-top: -4px;
+  }
 }
+#app {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 
 

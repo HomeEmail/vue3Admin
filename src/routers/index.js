@@ -1,34 +1,15 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import defaultComponent from '@/views/default.vue';
+// import defaultComponent from '@/views/default.vue';
+import Home from '@/components/home.vue';
+import contentRouter from '@/components/content-router.vue';
+import NotFound from '@/views/404.vue';
+import routerConfig from '@/routers/config';
 
 Vue.use(Router);
 
 export default new Router({
   mode: 'history',
   // base: process.env.BASE_URL,
-  routes: [
-    {
-      path: '/',
-      component: defaultComponent,
-    },
-    {
-      path: '/subPage',
-      name: 'subPage',
-      // route level code-splitting
-      // this generates a separate chunk (subPage.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "subPage" */'@/views/subPage.vue'),
-    },
-    {
-      path: '/vuexDemo',
-      name: 'vuexDemo',
-      component: () => import('@/views/vuexDemo.vue'),
-    },
-    {
-      path: '/axiosDemo',
-      name: 'axiosDemo',
-      component: () => import('@/views/axiosDemo.vue'),
-    },
-  ],
+  routes: routerConfig(Home, contentRouter, NotFound),
 });
