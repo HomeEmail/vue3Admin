@@ -33,10 +33,15 @@ yarn run test:unit
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
-下载不了依赖，尝试设置：
-yarn --registry=https://registry.npm.taobao.org --disturl=https://npm.taobao.org/dist
+下载不了依赖或者依赖下载出现各种问题，疑难杂症等，尝试：
+全局安装 nrm （一个依赖源管理工具）
+百度咋用吧，例如：
+nrm ls
+nrm use taobao
+删掉工程的node_modules文件夹
+重新npm install
 
-
+vw适配配置参考如下：
 https://www.cnblogs.com/zhaobao1830/p/9431454.html
 
 

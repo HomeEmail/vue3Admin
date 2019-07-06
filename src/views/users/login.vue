@@ -53,6 +53,8 @@
 </template>
 
 <script>
+import TestEs6 from '@/static/test-es6';
+
 export default {
   name: 'login',
   data() {
@@ -106,6 +108,9 @@ export default {
           console.log('login welcome!');
           // self.logining = true;
           this.$router.push('/welcome3');
+        } else {
+          const es = new TestEs6('xxoo', 22);
+          this.$message.error(es.say());
         }
       });
     },

@@ -16,6 +16,10 @@ module.exports = {
   你可以用如下配置：lintOnSave: process.env.NODE_ENV !== 'production'
   */
   lintOnSave: 'error',
+  transpileDependencies: [
+    'vue-echarts',
+    'resize-detector',
+  ],
   configureWebpack: (config) => {
     console.log('vue.config.js config.plugins:', config.plugins);
     if (process.env.NODE_ENV === 'production') {

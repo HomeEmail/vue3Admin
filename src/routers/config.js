@@ -10,13 +10,22 @@ export default (Home, contentRouter, NotFound) => [
       hideAtBreadcrumbsNav: true,
       hideAtTabNav: true,
     },
-    children: [
+    children: [ // 如上父级的配置，下面的孩子节点将会才菜单第一级出现
       {
         path: '/test1',
         component: () => import('@/views/test/test1.vue'),
         name: 'test1',
         meta: {
           title: 'test1',
+          icon: 'el-icon-service',
+        },
+      },
+      {
+        path: '/echart-demo',
+        component: () => import('@/views/echart-demo.vue'),
+        name: 'echartDemo',
+        meta: {
+          title: 'echartDemo',
           icon: 'el-icon-service',
         },
       },
