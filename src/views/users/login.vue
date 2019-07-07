@@ -54,6 +54,7 @@
 
 <script>
 import TestEs6 from '@/static/test-es6';
+import secret from '@/static/secret';
 
 export default {
   name: 'login',
@@ -104,6 +105,9 @@ export default {
     async handleSubmit(ev) {
       const self = this;
       self.$refs.ruleForm2.validate((valid) => {
+        const en = secret.Encrypt('sdf2233d$dsf||33||username');
+        console.log('secret.Encrypt', en);
+        console.log('secret.Decrypt', secret.Decrypt(en));
         if (valid) {
           console.log('login welcome!');
           // self.logining = true;
