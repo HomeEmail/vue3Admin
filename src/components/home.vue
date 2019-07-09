@@ -287,6 +287,7 @@ export default {
     handleExit(index, row) {
       // console.log(index, row);
       const self = this;
+      this.$router.push('/login');
     },
   },
 };

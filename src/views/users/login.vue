@@ -55,6 +55,9 @@
 <script>
 import TestEs6 from '@/static/test-es6';
 import secret from '@/static/secret';
+import {
+  getLoginAesKey,
+} from '@/api/user';
 
 export default {
   name: 'login',
@@ -95,8 +98,15 @@ export default {
   },
   created() {
   },
-  mounted() {
+  async mounted() {
     console.log('login mounted');
+    const req = getLoginAesKey();
+    try {
+      const k = await req.then();
+      console.log('getLoginAesKey', k);
+    } catch (error) {
+      console.log(error);
+    }
   },
   methods: {
     reloadCaptcha() {
