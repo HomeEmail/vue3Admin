@@ -1,4 +1,4 @@
-const GET_USERNAME = 'GET_userName';
+const SET_USERINFO = 'SET_USERINFO';
 
 export default {
   /**
@@ -7,7 +7,7 @@ export default {
    * @param {*} state
    */
   /* eslint no-param-reassign: "error" */
-  [GET_USERNAME](state) {
-    state.userName = 'zsf';
+  [SET_USERINFO](state, preload) {
+    state.userinfo = preload;
   },
 };

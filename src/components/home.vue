@@ -66,6 +66,9 @@
 import { mapState, mapGetters, mapActions } from 'vuex';
 import routesConfig from '@/routers/config';
 import asideMenuItem from './aside-menu-item.vue';
+import {
+  logout,
+} from '@/api/user';
 
 export default {
   name: 'Home',
@@ -84,7 +87,7 @@ export default {
   },
   computed: {
     ...mapState({
-      userName: state => state.userInfo.userName,
+      userName: state => state.user.userinfo.name,
     }),
     breadcrumbData() {
       const ary = [];
@@ -139,6 +142,7 @@ export default {
   mounted() {
     this.menuDefaultActive = this.$route.path;
     console.log('menuDefaultActive', this.menuDefaultActive);
+    console.log('vuex this.$store.state:', this.$store.state);
   },
   activated() {},
   destroyed() {},
@@ -284,10 +288,16 @@ export default {
     handleClose(key, keyPath) {
       console.log(key, keyPath);
     },
-    handleExit(index, row) {
+    async handleExit(index, row) {
       // console.log(index, row);
       const self = this;
-      this.$router.push('/login');
+      const req = logout();
+      try {
+        const result = await req.then();
+        this.$router.push('/login');
+      } catch (error) {
+        console.log(error);
+      }
     },
   },
 };

@@ -1,4 +1,6 @@
 import axios from 'axios';
+// import { mapState, mapGetters, mapActions } from 'vuex';
+import store from '@/store/index';
 import axiosConfig from './config';
 
 const instance = axios.create(axiosConfig);
@@ -6,7 +8,13 @@ const instance = axios.create(axiosConfig);
 // 请求前拦截处
 instance.interceptors.request.use((config) => {
   const con = config;
-  con.headers.Authorization = 'Bearer'; // test例子
+  // const obj = {
+  //   ...mapState({
+  //     token: state => state.user.userinfo.token,
+  //   }),
+  // };
+  console.log('instance.interceptors.request store.state:', store.state);
+  con.headers.Authorization = store.state.user.userinfo.token; // test例子
   return con;
 }, err => Promise.reject(err));
 

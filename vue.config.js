@@ -33,6 +33,6 @@ module.exports = {
     console.log('vue.config.js config.loader:', config.loader);
   },
   devServer: {
-    // proxy: 'http://localhost:4000'
+    proxy: 'http://127.0.0.1:7001',
   },
 };

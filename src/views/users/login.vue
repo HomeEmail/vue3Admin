@@ -2,41 +2,48 @@
   <div class="loginBox">
     <div class="loginBg"></div>
     <el-form
-      :model="ruleForm2"
+      name="imageToolLoginForm"
+      :model="formData"
       :rules="rules"
-      ref="ruleForm2"
+      ref="formData"
       label-position="left"
       label-width="0px"
       class="demo-ruleForm login-container"
     >
       <h3 class="title">管理后台系统</h3>
-      <el-form-item prop="account">
+      <el-form-item prop="loginName">
         <el-input
         type="text"
-        v-model="ruleForm2.account"
+        name="loginName"
+        v-model="formData.loginName"
         auto-complete="off"
-        placeholder="账号"
+        placeholder="邮箱"
       ></el-input>
       </el-form-item>
-      <el-form-item prop="checkPass">
+      <el-form-item prop="passwd">
         <el-input
           type="password"
-          v-model="ruleForm2.checkPass"
+          name="passwd"
+          v-model="formData.passwd"
           auto-complete="off"
           placeholder="密码"
         >
         </el-input>
       </el-form-item>
-      <el-form-item prop="captcha">
+      <el-form-item prop="verificationCode">
         <el-input type="text"
-          v-model="ruleForm2.captcha"
+          v-model="formData.verificationCode"
           style="width:150px;"
           auto-complete="off"
           placeholder="验证码"
           @keyup.native.enter="handleSubmit"
         >
         </el-input>
-        <img :src="captchaUrl" style="vertical-align: middle;" @click="reloadCaptcha()" />
+        <img
+          :src="captchaUrl"
+          style="vertical-align: middle;height:28px;margin-left:10px;"
+          @click="reloadCaptcha()"
+        />
       </el-form-item>
       <el-form-item style="width:100%; margin-top: 40px">
         <el-button
@@ -53,10 +60,12 @@
 </template>
 
 <script>
-import TestEs6 from '@/static/test-es6';
+// import TestEs6 from '@/static/test-es6';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import secret from '@/static/secret';
 import {
   getLoginAesKey,
+  login,
 } from '@/api/user';
 
 export default {
@@ -64,27 +73,34 @@ export default {
   data() {
     return {
       logining: false,
-      ruleForm2: {
-        account: '',
-        checkPass: '',
-        captcha: '',
+      formData: {
+        loginName: '',
+        passwd: '',
+        verificationCode: '',
       },
       rules: {
-        account: [
+        loginName: [
           {
+            type: 'email',
             required: true,
-            message: '请输入账号',
+            message: '请输入邮箱',
             trigger: 'blur',
           },
         ],
-        checkPass: [
+        passwd: [
           {
             required: true,
             message: '请输入密码',
             trigger: 'blur',
           },
+          {
+            min: 6,
+            max: 21,
+            message: '长度在 6 到 21 个字符',
+            trigger: 'blur',
+          },
         ],
-        captcha: [
+        verificationCode: [
           {
             required: true,
             message: '请输入验证码',
@@ -92,40 +108,58 @@ export default {
           },
         ],
       },
-      captchaUrl: '',
+      captchaUrl: `${process.env.VUE_APP_BASE_URL}/captcha`,
       checked: true,
     };
   },
   created() {
   },
   async mounted() {
-    console.log('login mounted');
-    const req = getLoginAesKey();
-    try {
-      const k = await req.then();
-      console.log('getLoginAesKey', k);
-    } catch (error) {
-      console.log(error);
-    }
+    console.log('login mounted', process.env.VUE_APP_BASE_URL);
   },
   methods: {
+    ...mapActions('user', [
+      'setUserinfo',
+    ]),
     reloadCaptcha() {
-      this.captchaUrl = `${this.aptchaUrl}?t=${Date.now()}`;
+      this.captchaUrl = `${this.captchaUrl}?t=${Date.now()}`;
     },
     async handleSubmit(ev) {
       const self = this;
-      self.$refs.ruleForm2.validate((valid) => {
-        const en = secret.Encrypt('sdf2233d$dsf||33||username');
-        console.log('secret.Encrypt', en);
-        console.log('secret.Decrypt', secret.Decrypt(en));
+      self.$refs.formData.validate(async (valid) => {
         if (valid) {
-          console.log('login welcome!');
+          const req = getLoginAesKey();
+          this.logining = true;
+          try {
+            const k = await req.then();
+            console.log('getLoginAesKey', k);
+            const en = secret.encryptByKey(this.formData.passwd, k.key);
+            console.log('secret.encryptByKey:', en);
+            // console.log('secret.decryptByKey:', secret.decryptByKey(en, k.key));
+            this.formData.passwd = en;
+            const reqLogin = login(this.formData);
+            const result = await reqLogin.then();
+            console.log('login response:', result);
+            if (result.code) {
+              this.setUserinfo(result.data);
+              this.$router.push('/welcome3');
+            } else {
+              this.$message.error(result.message);
+            }
+          } catch (error) {
+            console.log(error);
+            this.logining = false;
+            return 0;
+          }
+          this.logining = false;
+          // console.log('login welcome!');
           // self.logining = true;
-          this.$router.push('/welcome3');
+          // this.$router.push('/welcome3');
         } else {
-          const es = new TestEs6('xxoo', 22);
-          this.$message.error(es.say());
+          // const es = new TestEs6('xxoo', 22);
+          this.$message.error('输入登录信息有误，请检查再试！');
         }
+        return 1;
       });
     },
   },

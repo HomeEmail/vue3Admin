@@ -10,12 +10,34 @@
   <button @click="goPage">新建一个欢迎页4</button>
   <button @click="closePage">关闭</button>
   <button @click="lastPage">返回</button>
+  <div>
+    <el-upload
+      multiple
+      :headers="headers"
+      accept=".jpg,.jpeg,.png,.gif"
+      :action="uploadUrl"
+      list-type="picture-card"
+      :on-success="handleAvatarSuccess"
+      :before-upload="beforeAvatarUpload"
+      :on-preview="handlePictureCardPreview"
+      :on-remove="handleRemove">
+      <i class="el-icon-plus"></i>
+    </el-upload>
+  </div>
 </div>
 </template>
 
 <script>
 export default {
   name: 'test1',
+  data() {
+    return {
+      headers: {
+        Authorization: this.$store.state.user.userinfo.token,
+      },
+      uploadUrl: `${process.env.VUE_APP_BASE_URL}/upload`,
+    };
+  },
   created() {
     console.log('test1 created');
   },
@@ -32,6 +54,31 @@ export default {
     console.log('test1 destroyed');
   },
   methods: {
+    handleAvatarSuccess(res, file) {
+      console.log(res, file);
+      // this.imageUrl = URL.createObjectURL(file.raw);
+    },
+    beforeAvatarUpload(file) {
+      console.log('beforeAvatarUpload', file);
+      const ft = ['image/png', 'image/jpeg', 'image/gif'];
+      const isJPG = ft.some(f => f === file.type); // file.type === 'image/jpeg';
+      const isLt2M = file.size / 1024 / 1024 < 2;
+
+      if (!isJPG) {
+        this.$message.error('上传头像图片只能是 jpg、 jpeg、png和gif的格式!');
+      }
+      if (!isLt2M) {
+        this.$message.error('上传头像图片大小不能超过 2MB!');
+      }
+      return isJPG && isLt2M;
+    },
+    handleRemove(file, fileList) {
+      console.log(file, fileList);
+    },
+    handlePictureCardPreview(file) {
+      // this.dialogImageUrl = file.url;
+      // this.dialogVisible = true;
+    },
     closePage() {
       this.$emit('close-page', this.$route);
     },
