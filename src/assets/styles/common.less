@@ -26,6 +26,16 @@ img {
   content: normal !important;
 }
 
+
+/* 美化chrome浏览器滚动条 */
+::-webkit-scrollbar-track-piece{width:8px;background-color:#ffffff;}
+
+::-webkit-scrollbar{width:8px;height:6px;}
+
+::-webkit-scrollbar-thumb{height:50px;background:#ddd; cursor:pointer;border-radius: 8px;}
+
+::-webkit-scrollbar-thumb:hover{background:#ccc; cursor:pointer;}
+
 .unselect {
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -73,5 +83,11 @@ html,body,.app,#app{
   -moz-osx-font-smoothing: grayscale;
 }
 
-
+.uploadWrapper .el-upload{
+  display: block;
+}
+.el-upload-dragger{
+  width: auto;
+  padding: 10px;
+}
 

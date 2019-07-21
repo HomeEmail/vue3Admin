@@ -6,7 +6,7 @@
         <span class="cmsName">管理后台系统</span>
       </div>
       <div class="rightTopDiv">
-        <span class="userName">您好, {{userName}}</span>
+        <span class="userName">您好, {{userinfoGetter.name}}</span>
         <el-button type="text" @click="handleExit()">退出</el-button>
       </div>
     </div>
@@ -86,9 +86,12 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      userName: state => state.user.userinfo.name,
-    }),
+    // ...mapState({
+    //   userName: state => state.user.userinfo.name,
+    // }),
+    ...mapGetters('user', [
+      'userinfoGetter',
+    ]),
     breadcrumbData() {
       const ary = [];
       this.$route.matched.forEach((v, i) => {

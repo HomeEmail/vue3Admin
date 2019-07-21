@@ -10,7 +10,7 @@
       label-width="0px"
       class="demo-ruleForm login-container"
     >
-      <h3 class="title">管理后台系统</h3>
+      <h3 class="title">熊猫灵图</h3>
       <el-form-item prop="loginName">
         <el-input
         type="text"
@@ -142,7 +142,7 @@ export default {
             console.log('login response:', result);
             if (result.code) {
               this.setUserinfo(result.data);
-              this.$router.push('/welcome3');
+              this.$router.push('/home');
             } else {
               this.$message.error(result.message);
             }

@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Element from 'element-ui';
-import ECharts from 'vue-echarts';
+// import ECharts from 'vue-echarts';
 import App from './App.vue';
 import '@/assets/styles/reset.css';
 import 'element-ui/lib/theme-chalk/index.css';
@@ -15,7 +15,7 @@ import '@/plugins/mock/index';
 Vue.config.productionTip = false;
 Vue.prototype.$axios = axiosInstance;
 Vue.use(Element, { size: 'mini' }); // medium small mini
-Vue.component('v-chart', ECharts);
+// Vue.component('v-chart', ECharts);
 
 // 全局路由前置守卫
 router.beforeEach((to, from, next) => {

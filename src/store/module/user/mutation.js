@@ -9,5 +9,6 @@ export default {
   /* eslint no-param-reassign: "error" */
   [SET_USERINFO](state, preload) {
     state.userinfo = preload;
+    window.sessionStorage.setItem('userinfo', JSON.stringify(preload));
   },
 };
