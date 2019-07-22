@@ -14,6 +14,7 @@ import '@/plugins/mock/index';
 
 Vue.config.productionTip = false;
 Vue.prototype.$axios = axiosInstance;
+Vue.prototype.router = router;
 Vue.use(Element, { size: 'mini' }); // medium small mini
 // Vue.component('v-chart', ECharts);
 

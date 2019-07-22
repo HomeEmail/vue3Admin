@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import axios from 'axios';
 // import { mapState, mapGetters, mapActions } from 'vuex';
 import store from '@/store/index';
@@ -25,7 +26,16 @@ instance.interceptors.response.use(
     const {
       code, response, message, config,
     } = error;
-
+    console.log('response', response);
+    if (response.status === 401) {
+      // 未登陆
+      Vue.prototype.$alert('登录失效，请重新登录', '提示', {
+        confirmButtonText: '确定',
+        callback: (action) => {
+          Vue.prototype.router.push('/login');
+        },
+      });
+    }
     if (code === 'ECONNABORTED') {
       console.error('请求超时，请重试', message);
     }

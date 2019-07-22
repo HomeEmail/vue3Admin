@@ -14,9 +14,9 @@
     <div class="layoutCenter">
       <div class="leftWrapper">
         <div class="album">相册</div>
-        <div class="album-item active">全部</div>
+        <div class="album-item active" @click="albumItemClick({})">全部</div>
       </div>
-      <div class="centerWrapper" v-loading="logining">
+      <div class="centerWrapper" v-loading="loading">
         <div class="imageWrapper">
           <div class="image-item"
             v-for="(item, i) in images"
@@ -28,6 +28,11 @@
               :style="{backgroundImage:'url('+item.url+')'}"
             >
             </div>
+          </div>
+          <div v-if="images.length<=0"
+            style="text-align:center;width:100%;padding:30px;color:#000;font-size:14px;"
+          >
+            提示：无图片，请重新选择【颜色】或【相册】或【标签】搜索图片！
           </div>
         </div>
         <el-pagination
@@ -60,14 +65,48 @@
             <div class="el-upload__tip" slot="tip">只能上传jpg/png/gif文件，且不超过2MB</div>
           </el-upload>
         </div>
-        <div class="colorBox"></div>
+        <el-tabs v-model="rightTabActive" type="card" @tab-click="rightTabClick">
+          <el-tab-pane class="rightTabContent" label="图片颜色" name="color">
+            <div class="colorBox">
+              <div class="color-item"
+                v-for="color in colors"
+                :key="color.id"
+                :style="{backgroundColor:color.color}"
+                @click="colorItemClick(color)"
+              >
+              </div>
+              <div v-if="colors.length<=0" style="text-align:center;width: 100%;">
+                ~请选择页面中间的图片获取颜色~
+              </div>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane class="rightTabContent" label="搜索配置" name="setting">
+            <div class="colorSetting-item">
+              <span class="demonstration">主题符合度：(越小越精确)</span>
+              <el-slider v-model="colorQueryObj.weights" :min="1" :max="5"></el-slider>
+            </div>
+            <div class="colorSetting-item">
+              <span class="demonstration">H偏离范围：(越大图越多)</span>
+              <el-slider v-model="colorQueryObj.hOffset" :min="5" :max="50"></el-slider>
+            </div>
+            <div class="colorSetting-item">
+              <span class="demonstration">S偏离范围：(越大图越多)</span>
+              <el-slider v-model="colorQueryObj.sOffset" :min="0.01"
+                :max="0.1" :step="0.01"></el-slider>
+            </div>
+            <div class="colorSetting-item">
+              <span class="demonstration">V偏离范围：(越大图越多)</span>
+              <el-slider v-model="colorQueryObj.vOffset" :min="0.01"
+                :max="0.1" :step="0.01"></el-slider>
+            </div>
+          </el-tab-pane>
+        </el-tabs>
       </div>
     </div>
   </div>
 </template>
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-// import routesConfig from '@/routers/config';
 import {
   logout,
 } from '@/api/user';
@@ -81,13 +120,12 @@ export default {
   name: 'Home',
   data() {
     return {
-      // headers: {
-      //   Authorization: this.$store.state.user.userinfo.token,
-      // },
       uploadUrl: `${process.env.VUE_APP_BASE_URL}/upload`,
       images: [],
+      colors: [],
       lastImage: null,
-      logining: false,
+      loading: false,
+      rightTabActive: 'color',
       queryObj: {
         pageNo: 1,
         totalPage: 1,
@@ -95,6 +133,16 @@ export default {
         label_id: 0,
         album_id: 0,
       },
+      colorQueryObj: {
+        weights: 3,
+        hOffset: 20,
+        sOffset: 0.05,
+        vOffset: 0.05,
+        h: 0,
+        s: 0,
+        v: 0,
+      },
+      colorReq: null,
     };
   },
   computed: {
@@ -121,12 +169,27 @@ export default {
     console.log('Home.vue created route', this.$route);
   },
   mounted() {
+    console.log('process.env:', process.env);
     this.getUserImages();
   },
   activated() {},
   destroyed() {},
   methods: {
-    imageClick(image, i) {
+    async colorItemClick(color) {
+      console.log('colorItemClick:', color);
+      this.colorQueryObj.h = color.h;
+      this.colorQueryObj.s = color.s;
+      this.colorQueryObj.v = color.v;
+      await this.getImagesByColor();
+    },
+    rightTabClick(tab, e) {
+      console.log('rightTabClick:', tab, e);
+    },
+    albumItemClick(item) {
+      console.log('albumitem click:', item);
+      this.getUserImages();
+    },
+    async imageClick(image, i) {
       console.log('click image:', image);
       if (this.lastImage) {
         this.lastImage.active = false;
@@ -137,10 +200,59 @@ export default {
       };
       this.images = [...this.images];
       this.lastImage = this.images[i];
+      this.colors = [];
+      await this.getImageColors();
+    },
+    async getImageColors() {
+      if (this.lastImage.colors && this.lastImage.colors.length > 0) {
+        this.colors = this.lastImage.colors;
+        return;
+      }
+      if (this.colorReq) {
+        this.colorReq.abort();
+        this.colorReq = null;
+      }
+      this.colorReq = getImageColors({ images_id: this.lastImage.id });
+      try {
+        const result = await this.colorReq.then();
+        console.log('getImageColors response:', result);
+        if (result.code) {
+          this.colors = result.data;
+          this.lastImage.colors = result.data;
+        } else {
+          this.$message.error(result.message);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+      this.colorReq = null;
+    },
+    async getImagesByColor() {
+      const req = getImagesByColor(this.colorQueryObj);
+      this.loading = true;
+      try {
+        const result = await req.then();
+        console.log('getImagesByColor response:', result);
+        if (result.code) {
+          this.images = result.data;
+          this.images.forEach((v, i) => {
+            this.images[i].url = `http://localhost:8989/${v.path}`;
+          });
+          this.queryObj.pageNo = result.pageNo;
+          this.queryObj.pageSize = result.pageSize;
+          this.queryObj.totalPage = result.totalPage;
+        } else {
+          this.$message.error(result.message);
+        }
+      } catch (error) {
+        console.log(error);
+        this.loading = false;
+      }
+      this.loading = false;
     },
     async getUserImages() {
       const req = getUserImages(this.queryObj);
-      this.logining = true;
+      this.loading = true;
       try {
         const result = await req.then();
         console.log('getUserImages response:', result);
@@ -149,15 +261,18 @@ export default {
           this.images.forEach((v, i) => {
             this.images[i].url = `http://localhost:8989/${v.path}`;
           });
+          this.colors = [];
+          this.queryObj.pageNo = result.pageNo;
+          this.queryObj.pageSize = result.pageSize;
           this.queryObj.totalPage = result.totalPage;
         } else {
           this.$message.error(result.message);
         }
       } catch (error) {
         console.log(error);
-        this.logining = false;
+        this.loading = false;
       }
-      this.logining = false;
+      this.loading = false;
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
@@ -310,6 +425,8 @@ export default {
         width: 280px;
         border: 1px #efefef solid;
         padding: 10px;
+        cursor: pointer;
+        transition: all 0.33s;
         .img-bg{
           width: 100%;
           height: 100%;
@@ -322,7 +439,7 @@ export default {
           // margin-top: -2px;
         }
         &.active{
-          border: 2px #0e83fc solid;
+          border: 1px #0e83fc solid;
           box-shadow: 0px 8px 20px 0px #0e83fc5c;
         }
       }
@@ -332,12 +449,36 @@ export default {
     }
   }
   .rightWrapper{
-    flex-basis: 260px;
-    width: 260px;
+    flex-basis: 360px;
+    width: 360px;
     border-left: 1px #eee solid;
     overflow-y: auto;
     .uploadWrapper{
       padding: 10px;
+    }
+    .rightTabContent{
+      padding: 10px;
+    }
+    .colorBox{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      align-content: flex-start;
+      justify-content: space-between;
+      .color-item{
+        width: 95px;
+        height: 40px;
+        border-radius: 6px;
+        // margin-right: auto;
+        // margin-left: auto;
+        margin-bottom: 10px;
+        background-color: #ddd;
+        cursor: pointer;
+        box-shadow: 0px 0px 10px 0px #ccc;
+        &:hover{
+          box-shadow: 0px 0px 10px 0px rgb(126, 154, 248);
+        }
+      }
     }
   }
 
