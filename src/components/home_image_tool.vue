@@ -121,6 +121,7 @@ export default {
   data() {
     return {
       uploadUrl: `${process.env.VUE_APP_BASE_URL}/upload`,
+      img_base_path: process.env.NODE_ENV === 'production' ? 'https://ufotool.com:8989/' : 'http://localhost:8989/',
       images: [],
       colors: [],
       lastImage: null,
@@ -236,7 +237,7 @@ export default {
         if (result.code) {
           this.images = result.data;
           this.images.forEach((v, i) => {
-            this.images[i].url = `${process.env.IMG_BASE_URL}${v.path}`;
+            this.images[i].url = `${this.img_base_path}${v.path}`;
           });
           this.queryObj.pageNo = result.pageNo;
           this.queryObj.pageSize = result.pageSize;
@@ -259,7 +260,7 @@ export default {
         if (result.code) {
           this.images = result.data;
           this.images.forEach((v, i) => {
-            this.images[i].url = `${process.env.IMG_BASE_URL}${v.path}`;
+            this.images[i].url = `${this.img_base_path}${v.path}`;
           });
           this.colors = [];
           this.queryObj.pageNo = result.pageNo;
@@ -285,7 +286,7 @@ export default {
       this.images.unshift({
         id: res.id,
         path: res.data,
-        url: `${process.env.IMG_BASE_URL}${res.data}`,
+        url: `${this.img_base_path}${res.data}`,
       });
       // this.imageUrl = URL.createObjectURL(file.raw);
     },
