@@ -236,7 +236,7 @@ export default {
         if (result.code) {
           this.images = result.data;
           this.images.forEach((v, i) => {
-            this.images[i].url = `http://localhost:8989/${v.path}`;
+            this.images[i].url = `${process.env.IMG_BASE_URL}${v.path}`;
           });
           this.queryObj.pageNo = result.pageNo;
           this.queryObj.pageSize = result.pageSize;
@@ -259,7 +259,7 @@ export default {
         if (result.code) {
           this.images = result.data;
           this.images.forEach((v, i) => {
-            this.images[i].url = `http://localhost:8989/${v.path}`;
+            this.images[i].url = `${process.env.IMG_BASE_URL}${v.path}`;
           });
           this.colors = [];
           this.queryObj.pageNo = result.pageNo;
@@ -285,7 +285,7 @@ export default {
       this.images.unshift({
         id: res.id,
         path: res.data,
-        url: `http://localhost:8989/${res.data}`,
+        url: `${process.env.IMG_BASE_URL}${res.data}`,
       });
       // this.imageUrl = URL.createObjectURL(file.raw);
     },
