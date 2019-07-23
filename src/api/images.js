@@ -16,3 +16,7 @@ export function getImageColors(params) {
   const url = 'getImageColors';
   return axios.get(url, { params });
 }
+export function updateImageAlbum(data) {
+  const url = 'updateImageAlbum';
+  return axios.post(url, data);
+}

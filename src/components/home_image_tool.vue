@@ -13,8 +13,20 @@
 
     <div class="layoutCenter">
       <div class="leftWrapper">
-        <div class="album">相册</div>
-        <div class="album-item active" @click="albumItemClick({})">全部</div>
+        <div class="album">
+          <span>相册</span>
+          <i class="el-icon-circle-plus"
+            @click="newAlbum"
+          ></i>
+        </div>
+        <div class="album-item"
+          v-for="(item, i) in albums"
+          :key="item.id"
+          :class="item.active?'active':''"
+          @click="albumItemClick(item, i)"
+        >
+          {{ item.name }}
+        </div>
       </div>
       <div class="centerWrapper" v-loading="loading">
         <div class="imageWrapper">
@@ -28,6 +40,17 @@
               :style="{backgroundImage:'url('+item.url+')'}"
             >
             </div>
+            <el-select v-model="item.album_id" placeholder="请选择所属相册"
+              class="imageAlbumCover"
+              @change="imageAlbumChange(item.id, $event)"
+              >
+              <el-option
+                v-for="itemAlbum in albumOptions"
+                :key="itemAlbum.id"
+                :label="itemAlbum.name"
+                :value="itemAlbum.id">
+              </el-option>
+            </el-select>
           </div>
           <div v-if="images.length<=0"
             style="text-align:center;width:100%;padding:30px;color:#000;font-size:14px;"
@@ -48,23 +71,6 @@
         </el-pagination>
       </div>
       <div class="rightWrapper">
-        <div class="uploadWrapper">
-          <el-upload
-            class=""
-            multiple
-            :headers="headers"
-            accept=".jpg,.jpeg,.png,.gif"
-            :action="uploadUrl"
-            :on-success="handleImageSuccess"
-            :before-upload="beforeImageUpload"
-            :on-preview="handlePictureCardPreview"
-            :on-remove="handleRemove"
-            drag>
-            <i class="el-icon-upload"></i>
-            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-            <div class="el-upload__tip" slot="tip">只能上传jpg/png/gif文件，且不超过2MB</div>
-          </el-upload>
-        </div>
         <el-tabs v-model="rightTabActive" type="card" @tab-click="rightTabClick">
           <el-tab-pane class="rightTabContent" label="图片颜色" name="color">
             <div class="colorBox">
@@ -101,6 +107,23 @@
             </div>
           </el-tab-pane>
         </el-tabs>
+        <div class="uploadWrapper">
+          <el-upload
+            class=""
+            multiple
+            :headers="headers"
+            accept=".jpg,.jpeg,.png,.gif"
+            :action="uploadUrl"
+            :on-success="handleImageSuccess"
+            :before-upload="beforeImageUpload"
+            :on-preview="handlePictureCardPreview"
+            :on-remove="handleRemove"
+            drag>
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div class="el-upload__tip" slot="tip">只能上传jpg/png/gif文件，且不超过2MB</div>
+          </el-upload>
+        </div>
       </div>
     </div>
   </div>
@@ -109,11 +132,14 @@
 import { mapState, mapGetters, mapActions } from 'vuex';
 import {
   logout,
+  getUserAlbum,
+  insertAlbumRecord,
 } from '@/api/user';
 import {
   getUserImages,
   getImageColors,
   getImagesByColor,
+  updateImageAlbum,
 } from '@/api/images';
 
 export default {
@@ -122,6 +148,9 @@ export default {
     return {
       uploadUrl: `${process.env.VUE_APP_BASE_URL}/upload`,
       img_base_path: process.env.NODE_ENV === 'production' ? 'https://ufotool.com:8989/' : 'http://localhost:8989/',
+      albums: [],
+      albumOptions: [],
+      lastAlbumItem: null,
       images: [],
       colors: [],
       lastImage: null,
@@ -172,10 +201,87 @@ export default {
   mounted() {
     console.log('process.env:', process.env);
     this.getUserImages();
+    this.getUserAlbum();
   },
   activated() {},
   destroyed() {},
   methods: {
+    async imageAlbumChange(imageId, value) {
+      console.log(imageId, value);
+      if (!value) return;
+      const req = updateImageAlbum({
+        id: imageId,
+        album_id: value,
+      });
+      try {
+        const result = await req.then();
+        console.log('updateImageAlbum response:', result);
+        if (result.code) {
+          console.log('更新图片所属相册成功');
+        } else {
+          this.$message.error(result.message);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async getUserAlbum() {
+      const req = getUserAlbum();
+      try {
+        const result = await req.then();
+        console.log('getUserAlbum response:', result);
+        if (result.code) {
+          this.albumOptions = [
+            { id: 0, name: '请选择所属相册' },
+            ...result.data,
+          ];
+          this.albums = [
+            { id: 0, name: '全部', active: true },
+            ...result.data,
+          ];
+          [this.lastAlbumItem] = this.albums;
+        } else {
+          this.$message.error(result.message);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    newAlbum() {
+      this.$prompt('输入相册名称：', '新建相册', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+      }).then(async ({ value }) => {
+        if (!value) {
+          this.$message({
+            type: 'error',
+            message: '新建相册名称不能为空',
+          });
+          return;
+        }
+        // insertAlbumRecord
+        const req = insertAlbumRecord({
+          name: value,
+          comment: '',
+        });
+        try {
+          const result = await req.then();
+          console.log('insertAlbumRecord response:', result);
+          if (result.code && result.data.id) {
+            this.$message({
+              type: 'success',
+              message: '新建相册成功',
+            });
+            this.getUserAlbum();
+          } else {
+            this.$message.error(result.message);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }).catch(() => {
+      });
+    },
     async colorItemClick(color) {
       console.log('colorItemClick:', color);
       this.colorQueryObj.h = color.h;
@@ -186,8 +292,13 @@ export default {
     rightTabClick(tab, e) {
       console.log('rightTabClick:', tab, e);
     },
-    albumItemClick(item) {
-      console.log('albumitem click:', item);
+    albumItemClick(item, i) {
+      // console.log('albumitem click:', item);
+      if (this.lastAlbumItem && this.lastAlbumItem.id === item.id) return;
+      if (this.lastAlbumItem) this.lastAlbumItem.active = false;
+      this.queryObj.album_id = item.id;
+      this.albums[i].active = true;
+      this.lastAlbumItem = item;
       this.getUserImages();
     },
     async imageClick(image, i) {
@@ -242,6 +353,8 @@ export default {
           this.queryObj.pageNo = result.pageNo;
           this.queryObj.pageSize = result.pageSize;
           this.queryObj.totalPage = result.totalPage;
+          if (this.lastAlbumItem) this.lastAlbumItem.active = false;
+          this.lastAlbumItem = null;
         } else {
           this.$message.error(result.message);
         }
@@ -308,8 +421,8 @@ export default {
       console.log(file, fileList);
     },
     handlePictureCardPreview(file) {
-      // this.dialogImageUrl = file.url;
-      // this.dialogVisible = true;
+      const imageId = file.response.id;
+      const url = `${this.img_base_path}${file.response.data}`;
     },
     async handleExit(index, row) {
       // console.log(index, row);
@@ -325,6 +438,15 @@ export default {
   },
 };
 </script>
+<style>
+.layoutPage .image-item .el-select .el-input .el-input__inner {
+  background: rgba(255,255,255,1);
+  color: #000;
+  border: 0px;
+  box-shadow: 0px 0px 6px 0px #ccc;
+}
+</style>
+
 <style scoped lang="less">
 .layoutPage {
   height: 100%;
@@ -393,6 +515,13 @@ export default {
       font-size: 14px;
       // background-color: #efefef;
       border-bottom: 1px #eee solid;
+      display: flex;
+      justify-content: space-between;
+      .el-icon-circle-plus{
+        cursor: pointer;
+        line-height: 40px;
+        font-size: 16px;
+      }
     }
     .album-item{
       color: #333;
@@ -428,6 +557,7 @@ export default {
         padding: 10px;
         cursor: pointer;
         transition: all 0.33s;
+        position: relative;
         .img-bg{
           width: 100%;
           height: 100%;
@@ -435,13 +565,27 @@ export default {
           background-repeat: no-repeat;
           background-position: center;
         }
+        .imageAlbumCover{
+          position: absolute;
+          right: -1px;
+          top: -1px;
+          display: none;
+        }
         &:hover{
           box-shadow: 0px 8px 20px 0px #0e83fc5c;
           // margin-top: -2px;
         }
+        &:hover .imageAlbumCover{
+          display: block;
+        }
         &.active{
           border: 1px #0e83fc solid;
           box-shadow: 0px 8px 20px 0px #0e83fc5c;
+        }
+        .imageAlbumCover{
+          position: absolute;
+          right: -1px;
+          top: -1px;
         }
       }
     }
@@ -456,6 +600,7 @@ export default {
     overflow-y: auto;
     .uploadWrapper{
       padding: 10px;
+      margin-bottom: 10px;
     }
     .rightTabContent{
       padding: 10px;

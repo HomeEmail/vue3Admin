@@ -14,7 +14,12 @@ export function logout() {
   const url = 'logout';
   return axios.post(url);
 }
-export function test() {
-  console.log('test');
-  return 'test';
+
+export function getUserAlbum() {
+  const url = 'getUserAlbum';
+  return axios.get(url);
+}
+export function insertAlbumRecord(data) {
+  const url = 'insertAlbumRecord';
+  return axios.post(url, data);
 }
