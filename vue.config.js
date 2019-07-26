@@ -5,7 +5,7 @@ module.exports = {
   publicPath 有一些使用上的限制。在以下情况下，应当避免使用
   相对 publicPath:当使用基于 HTML5 history.pushState 的路由时；
   当使用 pages 选项构建多页面应用时; */
-  publicPath: '/',
+  publicPath: './',
   outputDir: 'dist', // 生成的生产环境构建文件的目录
   // 放置生成的静态资源 (js、css、img、fonts) 的 (相对于 outputDir 的) 目录
   assetsDir: '',

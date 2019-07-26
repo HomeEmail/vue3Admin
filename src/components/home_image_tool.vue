@@ -121,7 +121,7 @@
             drag>
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-            <div class="el-upload__tip" slot="tip">只能上传jpg/png/gif文件，且不超过2MB</div>
+            <div class="el-upload__tip" slot="tip">只能上传jpg/png/gif文件，且不超过5MB</div>
           </el-upload>
         </div>
       </div>
@@ -147,7 +147,7 @@ export default {
   data() {
     return {
       uploadUrl: `${process.env.VUE_APP_BASE_URL}/upload`,
-      img_base_path: process.env.NODE_ENV === 'production' ? 'https://ufotool.com:8989/' : 'http://localhost:8989/',
+      img_base_path: process.env.NODE_ENV === 'production' ? 'https://ufotool.com/imageTool/upload/getfile/' : 'http://localhost:8989/',
       albums: [],
       albumOptions: [],
       lastAlbumItem: null,
@@ -407,13 +407,13 @@ export default {
       console.log('beforeImageUpload', file);
       const ft = ['image/png', 'image/jpeg', 'image/gif'];
       const isJPG = ft.some(f => f === file.type); // file.type === 'image/jpeg';
-      const isLt2M = file.size / 1024 / 1024 < 2;
+      const isLt2M = file.size / 1024 / 1024 < 5;
 
       if (!isJPG) {
         this.$message.error('上传图片只能是 jpg、 jpeg、png和gif的格式!');
       }
       if (!isLt2M) {
-        this.$message.error('上传图片大小不能超过 2MB!');
+        this.$message.error('上传图片大小不能超过 5MB!');
       }
       return isJPG && isLt2M;
     },

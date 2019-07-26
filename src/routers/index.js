@@ -11,7 +11,7 @@ import routerConfig from '@/routers/config_image_tool';
 Vue.use(Router);
 
 export default new Router({
-  mode: 'history',
+  // mode: 'history',
   // base: process.env.BASE_URL,
   routes: routerConfig(Home, contentRouter, NotFound),
 });
